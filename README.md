@@ -1,5 +1,5 @@
 # matchingNet
-This repo contains the code for [Matching Networks for One Shot Learning](https://arxiv.org/abs/1606.04080) in Pytorch
+This repo contains the code for [Learning to Compare: Relation Network for Few-Shot Learning](https://arxiv.org/pdf/1711.06025.pdf) in Pytorch
 
 -------------------------------------
 ## Usage
@@ -15,9 +15,9 @@ feel free to modify `config.py` to change arguments
 
 ### weights
 
-pretrained weights for miniImageNet on 5-way 1-shot is [here](https://drive.google.com/file/d/1HPPLkSbPGgyzVfMUr3fyilhr0I3koZkK/view?usp=sharing)
+pretrained weights for miniImageNet on 5-way 1-shot is [here]()
 
 ### todos
-* add FCE from my Tensorflow implementation
+* add ResNet version.
 * merge training and testing
 
