@@ -75,7 +75,7 @@ def loadImg(sample_list):
         img = RGB_img
         if np.random.choice([True, False]) and mode is "training":
             img = cv2.flip(RGB_img,1)
-        imgNormalize = randomCrop(img, centralCrop=True)
+        imgNormalize = randomCrop(img, centralCrop=args.central_crop)
         train_images_data.append(imgNormalize.reshape(80, 80, 3))
 
     train_images_data.insert(0, sample_list[0])
@@ -90,7 +90,7 @@ def loadImg_testing(sample_list):
         img = RGB_img
         if np.random.choice([True, False]) and mode is "training":
             img = cv2.flip(RGB_img, 1)
-        imgNormalize = randomCrop(img, centralCrop=True)
+        imgNormalize = randomCrop(img, centralCrop=args.central_crop)
         train_images_data.append(imgNormalize.reshape(80, 80, 3))
 
     train_images_data.insert(0, sample_list[0])
