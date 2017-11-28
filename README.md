@@ -1,4 +1,4 @@
-# matchingNet
+# relationNet
 This repo contains the code for [Learning to Compare: Relation Network for Few-Shot Learning](https://arxiv.org/pdf/1711.06025.pdf) in Pytorch
 
 -------------------------------------
