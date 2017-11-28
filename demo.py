@@ -73,7 +73,7 @@ def main(args):
         # epoch training list
         trainList_combo = Producer(trainList, args.batch_size, EPOCH_SIZE, "training") # combo contains [query_label, query_path ]
         list_trainset = tnt.dataset.ListDataset(trainList_combo, loadImg)
-        trainloader = list_trainset.parallel(batch_size=args.batch_size, num_workers=24, shuffle=True)
+        trainloader = list_trainset.parallel(batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
 
         for i, data in enumerate(tqdm(trainloader), 0):
 
@@ -138,7 +138,7 @@ def main(args):
         # epoch training list
         testList_combo = Producer(testList, args.batch_size_test, EPOCH_SIZE_TEST, "testing") # combo contains [query_label, query_path ]
         list_testset = tnt.dataset.ListDataset(testList_combo, loadImg_testing)
-        testloader = list_testset.parallel(batch_size=args.batch_size_test, num_workers=24, shuffle=False)
+        testloader = list_testset.parallel(batch_size=args.batch_size_test, num_workers=args.num_workers, shuffle=False)
         for i, data in enumerate(tqdm(testloader), 0):
             # get inputs
             batchSize = data[0].size()[0]
@@ -152,9 +152,9 @@ def main(args):
 
             # wrap in Variable
             if torch.cuda.is_available():
-                images_all, labels_one_hot = Variable(images_all.cuda()), Variable(labels_one_hot.cuda())
+                images_all, labels_one_hot = Variable(images_all.cuda(), volatile=True), Variable(labels_one_hot.cuda(), volatile=True)
             else:
-                images_all, labels_one_hot = Variable(images_all), Variable(labels_one_hot)
+                images_all, labels_one_hot = Variable(images_all, volatile=True), Variable(labels_one_hot, volatile=True)
 
             # forward
             feature_s_all_t0_p = net(images_all)
@@ -173,7 +173,7 @@ def main(args):
             _, predicted = torch.max(relationScore.data, 1)
             avg_accu_Test += (predicted == torch.squeeze(labels, 1).cuda()).sum()
 
-        print('test accuracy: %.3f' % (avg_accu_Test/(total_batch_test*batchSize)))
+        print('test accuracy: %.3f' % (avg_accu_Test/EPOCH_SIZE_TEST))
         avg_accu_Test = 0.0
 
 

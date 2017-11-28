@@ -75,10 +75,11 @@ def loadImg(sample_list):
         img = RGB_img
         if np.random.choice([True, False]) and mode is "training":
             img = cv2.flip(RGB_img,1)
-        imgNormalize = randomCrop(img)
+        imgNormalize = randomCrop(img, centralCrop=True)
         train_images_data.append(imgNormalize.reshape(80, 80, 3))
 
-    return sample_list[0], train_images_data[0], train_images_data[1], train_images_data[2], train_images_data[3], train_images_data[4], train_images_data[5] #TODO fix me
+    train_images_data.insert(0, sample_list[0])
+    return tuple(train_images_data)
 
 def loadImg_testing(sample_list):
     mode = "testing"
@@ -89,8 +90,8 @@ def loadImg_testing(sample_list):
         img = RGB_img
         if np.random.choice([True, False]) and mode is "training":
             img = cv2.flip(RGB_img, 1)
-        imgNormalize = randomCrop(img)
+        imgNormalize = randomCrop(img, centralCrop=True)
         train_images_data.append(imgNormalize.reshape(80, 80, 3))
 
-    return sample_list[0], train_images_data[0], train_images_data[1], train_images_data[2], train_images_data[3], \
-               train_images_data[4], train_images_data[5]
+    train_images_data.insert(0, sample_list[0])
+    return tuple(train_images_data)
