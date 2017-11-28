@@ -86,9 +86,10 @@ def get_combination_miniImageNet_5way1shot_random_pathonly_episode_variableWays(
 
   tie = list(zip(trueLabelSet_list, *train_images_lists))
   np.random.shuffle(tie)
-  trueLabel_supportSet_query = zip(*tie)
+  trueLabel_supportSet_query = zip(*tie) # list of 7 (true label, support_img_0 ... support_img_4, query_img)
+  trueLabel_supportSet_query = map(list, zip(*trueLabel_supportSet_query)) # list of nSample
 
-  trueLabelSet = np.asarray(trueLabel_supportSet_query[0])
-  trueLabel_supportSet_query[0] = trueLabelSet.reshape(nSample, 1)
+  #trueLabelSet = np.asarray(trueLabel_supportSet_query[0])
+  #trueLabel_supportSet_query[0] = trueLabelSet.reshape(nSample, 1)
 
   return trueLabel_supportSet_query
