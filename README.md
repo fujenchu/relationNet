@@ -17,13 +17,13 @@ feel free to modify `config.py` to change arguments
 
 pretrained weights for miniImageNet on 5-way 1-shot is [here]()
 
-### todos
-* add ResNet version.
-* merge training and testing
-
 ### results
 |settings|5w1s acc|
 |----|----|
 |84x84 conv w padding| 45.8%
 |80x80 randCrop| 49.0%
+
+### todos
+* add ResNet version.
+* merge training and testing
 
