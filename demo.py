@@ -7,7 +7,7 @@ from torch.optim.lr_scheduler import StepLR
 from nets import Net, RelationNet
 from config import args
 from dataloader import Producer, loadImg, loadImg_testing
-from utils import read_miniImageNet_pathonly
+from utils import read_miniImageNet_pathonly, Dashboard
 from Queue import Queue
 import numpy as np
 import threading
@@ -23,6 +23,10 @@ def main(args):
     '''
     main function
     '''
+
+    if args.logport:
+        args.logport = Dashboard(args.logport, 'dashboard')
+
     EPOCH_SIZE = args.num_episode*args.num_query*args.way_train
     EPOCH_SIZE_TEST = args.num_episode*args.num_query*args.way_test
 
@@ -76,7 +80,6 @@ def main(args):
         trainloader = list_trainset.parallel(batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
 
         for i, data in enumerate(tqdm(trainloader), 0):
-
             # get inputs
             batchSize = data[0].size()[0]
             labels = torch.unsqueeze(data[0], 1)
@@ -122,8 +125,16 @@ def main(args):
             _, predicted = torch.max(relationScore.data, 1)
             labels = torch.squeeze(labels, 1)
             avg_accu_Train += (predicted == labels.cuda()).sum()
-            if i % 1000 == 999:
-                print('[%d, %5d] train loss: %.3f  train accuracy: %.3f' % (epoch + 1, i + 1, running_loss / 1000, avg_accu_Train/(1000*batchSize)))
+            if i % args.log_step == args.log_step-1:
+                #print('[%d, %5d] train loss: %.3f  train accuracy: %.3f' % (epoch + 1, i + 1, running_loss / args.log_step, avg_accu_Train/(args.log_step*batchSize)))
+
+                if args.logport:
+                    args.logport.appendlog(running_loss / args.log_step, 'Training Loss')
+                    args.logport.appendlog(avg_accu_Train/(args.log_step*batchSize), 'Training Accuracy')
+                    args.logport.image((images[-1][0, :, :, :]).permute(2, 0, 1), 'query img', mode='img')
+                    for idx in range(args.way_train):
+                        args.logport.image((images[idx][0, :, :, :]).permute(2, 0, 1), 'support img', mode='img')
+
                 running_loss = 0.0
                 avg_accu_Train = 0.0
 
@@ -134,6 +145,8 @@ def main(args):
                 torch.save(relationNet.state_dict(),
                            os.path.join(args.model_path,
                                         'relationNet-model-%d-%d.pkl' %(epoch+1, i+1)))
+
+
         net.eval()
         # epoch training list
         testList_combo = Producer(testList, args.batch_size_test, EPOCH_SIZE_TEST, "testing") # combo contains [query_label, query_path ]
@@ -174,6 +187,7 @@ def main(args):
             avg_accu_Test += (predicted == torch.squeeze(labels, 1).cuda()).sum()
 
         print('test accuracy: %.3f' % (avg_accu_Test/EPOCH_SIZE_TEST))
+        #print('test accuracy: %.3f' % (avg_accu_Test / (100*args.batch_size_test)))
         avg_accu_Test = 0.0
 
 

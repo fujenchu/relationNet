@@ -35,25 +35,6 @@ def randomCrop(img, centralCrop=False):
 
 
 def Producer(list, batch_size, epoch_size, mode):
-  '''
-  produce customized dataset (5 way 1 shot images and labels)
-     
-    :param 
-        queue: train or test queue to fill in
-        list: pre-generated list of a training data or testing data
-        batch_size: batch size
-        epoch_size: total number of sampling
-        mode: either training or testing
-    :return: 
-        queue: fill the queue with generated data
-  '''
-
-  total_batch = int(epoch_size/batch_size)
-  epochNum = 0
-  while 1:
-    print ("epoch num = " + str(epochNum))
-    epochNum = epochNum + 1
-
     if mode is "training":
         WAYS_TRAIN_TEST = args.way_train
     else:
@@ -62,9 +43,8 @@ def Producer(list, batch_size, epoch_size, mode):
     print ('generating ' + mode + ' combination.. ')
     # [0] is trueLabel; [-1] is t0;
     trueLabel_supportSet_query = get_combination_miniImageNet_5way1shot_random_pathonly_episode_variableWays(list, visualize=False,episode_num=args.num_episode, ways = WAYS_TRAIN_TEST, query_num = args.num_query)
-    print('done')
-
     return trueLabel_supportSet_query
+
 
 def loadImg(sample_list):
     mode = "training"
@@ -80,6 +60,7 @@ def loadImg(sample_list):
 
     train_images_data.insert(0, sample_list[0])
     return tuple(train_images_data)
+
 
 def loadImg_testing(sample_list):
     mode = "testing"

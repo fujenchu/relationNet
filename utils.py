@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import zipfile
 
+from torch.autograd import Variable
+from visdom import Visdom
+
 def read_miniImageNet_pathonly(TESTMODE = False, miniImageNetPath = '/media/fujenchu/dataset/miniImageNet/', imgPerCls = 600):
   '''
   input:  
@@ -93,3 +96,45 @@ def get_combination_miniImageNet_5way1shot_random_pathonly_episode_variableWays(
   #trueLabel_supportSet_query[0] = trueLabelSet.reshape(nSample, 1)
 
   return trueLabel_supportSet_query
+
+
+# code from
+# https://github.gatech.edu/CVL8803project/ITcycle/blob/master/utils/weblogger.py
+class Dashboard:
+    def __init__(self, port, envname):
+        self.vis = Visdom(port=port)
+        self.logPlot = None
+        self.dataCount = 0
+        self.envname = envname
+
+    def appendlog(self, value, logname, addcount=True):
+        if addcount:
+            self.dataCount += 1
+        if self.logPlot:
+            self.vis.updateTrace(
+                X=np.array([self.dataCount]),
+                Y=np.array([value]),
+                win=self.logPlot,
+                name=logname,
+                env=self.envname
+            )
+        else:
+            self.logPlot = self.vis.line(np.array([value]), np.array([self.dataCount]), env=self.envname,
+                                         opts=dict(title=self.envname, legend=[logname]))
+
+    def image(self, image, title, mode='img', denorm=True, caption=''):  # denorm: de-normalization
+        if image.is_cuda:
+            image = image.cpu()
+        if isinstance(image, Variable):
+            image = image.data
+        if denorm:
+            image[0] = image[0] * .2741 + .4710
+            image[1] = image[1] * .2661 + .4498
+            image[2] = image[2] * .2809 + .4034
+            image = image.sub_(image.min())
+            image = image.div_(image.max())
+        image = image.numpy()
+        self.vis.image(image, env=self.envname + '-' + mode, opts=dict(title=title, caption=caption))
+
+    #def text(self, text, mode):
+    #    self.vis.text(text, env=self.envname + '-' + mode)
