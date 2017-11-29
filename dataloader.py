@@ -34,15 +34,10 @@ def randomCrop(img, centralCrop=False):
   return imgNormalize
 
 
-def Producer(list, batch_size, epoch_size, mode):
-    if mode is "training":
-        WAYS_TRAIN_TEST = args.way_train
-    else:
-        WAYS_TRAIN_TEST = args.way_test
-
-    print ('generating ' + mode + ' combination.. ')
+def Producer(list, ways_num, episode_num, mode):
+    #print ('generating ' + mode + ' combination.. ')
     # [0] is trueLabel; [-1] is t0;
-    trueLabel_supportSet_query = get_combination_miniImageNet_5way1shot_random_pathonly_episode_variableWays(list, visualize=False,episode_num=args.num_episode, ways = WAYS_TRAIN_TEST, query_num = args.num_query)
+    trueLabel_supportSet_query = get_combination_miniImageNet_5way1shot_random_pathonly_episode_variableWays(list, visualize=False,episode_num=episode_num, ways=ways_num, query_num=args.num_query)
     return trueLabel_supportSet_query
 
 

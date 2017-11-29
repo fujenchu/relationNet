@@ -7,7 +7,7 @@ from torch.optim.lr_scheduler import StepLR
 from nets import Net, RelationNet
 from config import args
 from dataloader import Producer, loadImg, loadImg_testing
-from utils import read_miniImageNet_pathonly, Dashboard
+from utils import read_miniImageNet_pathonly, mean_confidence_interval, Dashboard
 from Queue import Queue
 import numpy as np
 import threading
@@ -28,7 +28,7 @@ def main(args):
         args.logport = Dashboard(args.logport, 'dashboard')
 
     EPOCH_SIZE = args.num_episode*args.num_query*args.way_train
-    EPOCH_SIZE_TEST = args.num_episode*args.num_query*args.way_test
+    EPOCH_SIZE_TEST = args.num_episode_test*args.num_query*args.way_test
 
 
     '''define network'''
@@ -71,15 +71,16 @@ def main(args):
 
         running_loss = 0.0
         avg_accu_Train = 0.0
-        avg_accu_Test = 0.0
-        total_batch_test = int(EPOCH_SIZE_TEST / args.batch_size)
+        accu_Test_stats = []
 
         # epoch training list
-        trainList_combo = Producer(trainList, args.batch_size, EPOCH_SIZE, "training") # combo contains [query_label, query_path ]
+        trainList_combo = Producer(trainList, args.way_train, args.num_episode, "training") # combo contains [query_label, query_path ]
         list_trainset = tnt.dataset.ListDataset(trainList_combo, loadImg)
         trainloader = list_trainset.parallel(batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
 
         for i, data in enumerate(tqdm(trainloader), 0):
+        #for i, data in enumerate(trainloader, 0):
+
             # get inputs
             batchSize = data[0].size()[0]
             labels = torch.unsqueeze(data[0], 1)
@@ -149,10 +150,11 @@ def main(args):
 
         net.eval()
         # epoch training list
-        testList_combo = Producer(testList, args.batch_size_test, EPOCH_SIZE_TEST, "testing") # combo contains [query_label, query_path ]
+        testList_combo = Producer(testList, args.way_test, args.num_episode_test, "testing") # combo contains [query_label, query_path ]
         list_testset = tnt.dataset.ListDataset(testList_combo, loadImg_testing)
         testloader = list_testset.parallel(batch_size=args.batch_size_test, num_workers=args.num_workers, shuffle=False)
-        for i, data in enumerate(tqdm(testloader), 0):
+        #for i, data in enumerate(tqdm(testloader), 0):
+        for i, data in enumerate(testloader, 0):
             # get inputs
             batchSize = data[0].size()[0]
 
@@ -184,11 +186,15 @@ def main(args):
 
 
             _, predicted = torch.max(relationScore.data, 1)
-            avg_accu_Test += (predicted == torch.squeeze(labels, 1).cuda()).sum()
+            #avg_accu_Test += (predicted == torch.squeeze(labels, 1).cuda()).sum()
+            accu_Test_stats.append((predicted == torch.squeeze(labels, 1).cuda()).sum()/float(batchSize))
 
-        print('test accuracy: %.3f' % (avg_accu_Test/EPOCH_SIZE_TEST))
-        #print('test accuracy: %.3f' % (avg_accu_Test / (100*args.batch_size_test)))
-        avg_accu_Test = 0.0
+
+        m, h = mean_confidence_interval(np.asarray(accu_Test_stats), confidence=0.95)
+        print('test accuracy with 0.95 confidence: %.4f, +-: %.4f' % (m, h))
+
+        #avg_accu_Test = 0.0
+        accu_Test_stats = []
 
 
 if __name__ == '__main__':

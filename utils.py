@@ -1,11 +1,22 @@
 import glob
 import numpy as np
-#import cv2
 import matplotlib.pyplot as plt
 import zipfile
 
 from torch.autograd import Variable
 from visdom import Visdom
+
+import scipy as sp
+import scipy.stats
+
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0*np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * sp.stats.t._ppf((1+confidence)/2., n-1)
+    #return m, m-h, m+h
+    return m, h
+
 
 def read_miniImageNet_pathonly(TESTMODE = False, miniImageNetPath = '/media/fujenchu/dataset/miniImageNet/', imgPerCls = 600):
   '''
