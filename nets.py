@@ -27,7 +27,7 @@ class Net(nn.Module):
 
 
 class RelationNet(nn.Module):
-    def __init__(self, num_in_channel, num_filter, num_fc1, num_fc2):
+    def __init__(self, num_in_channel, num_filter, num_fc1, num_fc2, drop_prob):
         super(RelationNet, self).__init__()
         self.conv1 = nn.Conv2d(num_in_channel, num_filter, 3, padding=1)
         self.bn1 = nn.BatchNorm2d(num_filter)
@@ -36,6 +36,7 @@ class RelationNet(nn.Module):
         self.fc1 = nn.Linear(num_fc1, num_fc2)
         self.fc2 = nn.Linear(num_fc2, 1)
         self.pool = nn.MaxPool2d(2, stride=2)
+        self.drop_prob = drop_prob
 
 
     def forward(self, x):
@@ -43,5 +44,6 @@ class RelationNet(nn.Module):
         x = self.pool(F.relu(self.bn2(self.conv2(x)))) # 5x5
         x = x.view(x.size()[0], -1) # 6400
         x = F.relu(self.fc1(x)) #8
+        x = F.dropout(x, p=self.drop_prob, training=self.training)
         x = F.sigmoid(self.fc2(x)) #1
         return x

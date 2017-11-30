@@ -33,7 +33,7 @@ def main(args):
 
     '''define network'''
     net = Net(args.num_in_channel, args.num_filter)
-    relationNet = RelationNet(args.num_filter*2, args.num_filter, 5*5*args.num_filter, args.num_fc)
+    relationNet = RelationNet(args.num_filter*2, args.num_filter, 5*5*args.num_filter, args.num_fc, args.drop_prob)
     if torch.cuda.is_available():
         net.cuda()
         relationNet.cuda()
@@ -73,6 +73,8 @@ def main(args):
         avg_accu_Train = 0.0
         accu_Test_stats = []
 
+        net.train()
+        relationNet.train()
         # epoch training list
         trainList_combo = Producer(trainList, args.way_train, args.num_episode, "training") # combo contains [query_label, query_path ]
         list_trainset = tnt.dataset.ListDataset(trainList_combo, loadImg)
@@ -149,6 +151,7 @@ def main(args):
 
 
         net.eval()
+        relationNet.eval()
         # epoch training list
         testList_combo = Producer(testList, args.way_test, args.num_episode_test, "testing") # combo contains [query_label, query_path ]
         list_testset = tnt.dataset.ListDataset(testList_combo, loadImg_testing)
@@ -191,7 +194,7 @@ def main(args):
 
 
         m, h = mean_confidence_interval(np.asarray(accu_Test_stats), confidence=0.95)
-        print('test accuracy with 0.95 confidence: %.4f, +-: %.4f' % (m, h))
+        print('[epoch %3d] test accuracy with 0.95 confidence: %.4f, +-: %.4f' % (epoch + 1, m, h))
 
         #avg_accu_Test = 0.0
         accu_Test_stats = []
