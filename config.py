@@ -32,7 +32,7 @@ parser.add_argument('--way_test', type=int, default=5)
 parser.add_argument('--num_query', type=int, default=15)
 parser.add_argument('--num_workers', type=int, default=24)
 parser.add_argument('--learning_rate', type=float, default=0.001)
-parser.add_argument('--drop_prob', type=float, default=0.2)
+parser.add_argument('--drop_prob', type=float, default=0.0)
 
 
 parser.add_argument('--log_step', type=int, default=100,

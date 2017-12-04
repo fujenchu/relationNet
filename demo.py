@@ -64,7 +64,7 @@ def main(args):
                                           miniImageNetPath='/home/fujenchu/projects/dataset/miniImageNet_Ravi/',
                                           imgPerCls=600)
 
-    scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+    scheduler = StepLR(optimizer, step_size=40, gamma=0.5)
     ''' training'''
     for epoch in range(1000):
         scheduler.step()
